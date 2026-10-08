@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Parking framework</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans pb-12">
+
+    <header class="bg-indigo-700 p-5 shadow-lg border-b border-indigo-500">
+        <div class="container mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 class="text-xl sm:text-2xl font-black tracking-wider text-white">📡 AUTOMATED SMART PARKING FRAMEWORK</h1>
+            <div class="flex items-center gap-2 bg-slate-900/60 px-3 py-1.5 rounded-full border border-indigo-400/30 text-xs text-indigo-300">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto mt-8 px-4 space-y-8">
+        
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg text-lg">📋</div>
+                <div>
+                    <h2 class="text-lg font-bold tracking-tight">Active Infrastructure Allocations</h2>
+                    <p class="text-xs text-slate-400">Current state representation of real-world occupied arrays matching physical hardware states.</p>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto rounded-lg border border-slate-700 bg-slate-900/50">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800 text-slate-400 uppercase text-xs font-bold tracking-wider border-b border-slate-700">
+                            <th class="p-4">Registered Operator</th>
+                            <th class="p-4">Vehicle ID</th>
+                            <th class="p-4">Hub Location</th>
+                            <th class="p-4">Assigned Slot</th>
+                            <th class="p-4">Core Transaction ID</th>
+                            <th class="p-4 text-center">Hardware Override</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTableBody" class="text-sm divide-y divide-slate-800">
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-slate-500">Awaiting database connection telemetry vectors...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="space-y-6">
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-md">
+                    <h3 class="text-md font-bold text-slate-200 mb-3 flex items-center gap-2">
+                        <span>📍</span> Select Target Regional Hub
+                    </h3>
+                    <select id="locationSelect" class="w-full bg-slate-900 border border-slate-700 text-slate-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" onchange="fetchSlots()">
+                        <option value="">-- Link to Hub Location Matrix --</option>
+                    </select>
+
+                    <div id="mapWrapper" class="hidden mt-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono text-emerald-400 tracking-wider font-bold">🗺️ REAL-TIME GPS TRACKER MAP</span>
+                            <span id="mapPlaceBadge" class="text-[10px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800 font-mono font-bold">GPS LOCK</span>
+                        </div>
+                        
+                        <div id="leafletMapContainer" class="w-full h-52 bg-slate-950 rounded-lg border border-slate-700 overflow-hidden shadow-inner relative z-0"></div>
+                        
+                        <a id="googleMapsBtn" href="#" target="_blank" class="w-full bg-slate-900 hover:bg-slate-950 border border-slate-700 hover:border-emerald-500 text-slate-200 hover:text-emerald-400 p-2.5 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all shadow duration-150">
+                            <span>🚗</span> Open & Navigate in Google Maps
+                        </a>
+
+                        <div id="coordinatesText" class="text-[11px] font-mono text-slate-400 bg-slate-900/60 p-2 rounded border border-slate-800 flex justify-between">
+                            <span>Lat: <b id="latVal" class="text-slate-200"></b></span>
+                            <span>Lng: <b id="lngVal" class="text-slate-200"></b></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="paymentSection" class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-md opacity-40 pointer-events-none transition-opacity duration-300">
+                    <h3 class="text-md font-bold text-slate-200 mb-2 flex items-center gap-2">
+                        <span>💳</span> Secure Automated Payment Gateway
+                    </h3>
+                    <p class="text-[11px] text-amber-400/80 mb-4 bg-amber-950/40 border border-amber-900/30 p-2 rounded">
+                        * Input data requirements: 16 digits numerical character sequence to pass mock secure checkout validations.
+                    </p>
+                    
+                    <div class="space-y-3 text-xs">
+                        <input type="text" id="userName" placeholder="Operator Name" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <input type="text" id="vehicleNum" placeholder="Vehicle License Plate Reference" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <input type="password" id="cardNum" placeholder="16-Digit Master / Visa Card Input" maxlength="16" class="w-full bg-slate-900 border border-slate-700 p-2.5 rounded text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <div class="bg-slate-950 p-3 text-center text-xs font-mono font-bold text-indigo-300 rounded border border-slate-800">
+                            RATE CALCULATOR: ₹50.00 / FIXED HR
+                        </div>
+                        <button onclick="submitBooking()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow transition duration-200 tracking-wide text-sm">
+                            AUTHORIZE GATEWAY CHECKOUT
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-md flex flex-col">
+                <h3 class="text-md font-bold text-slate-200 mb-1 flex items-center gap-2">
+                    <span>🚗</span> Live Matrix IoT Grid Display
+                </h3>
+                <p class="text-slate-400 text-xs mb-6">Green elements reflect vacant slots verified via hardware arrays. Red blocks state real-time obstructions matching active database records.</p>
+
+                <div id="slotGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-4 my-auto p-6 bg-slate-950 border border-slate-800 rounded-xl min-h-[280px] items-center justify-center">
+                    <p class="text-slate-500 text-xs font-mono col-span-full text-center">Link to a regional zone on the sidebar to communicate with localized hardware mesh arrays.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const BACKEND_ENDPOINT = 'http://localhost:3000/api';
+        let targetedSlotInstanceId = null;
+        let mappingCacheStore = [];
+        let mapInstance = null;
+        let mapMarker = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            initializeMapDropdown();
+            refreshActiveManifestRows();
+        });
+
+        async function initializeMapDropdown() {
+            try {
+                const res = await fetch(`${BACKEND_ENDPOINT}/locations`);
+                const nodes = await res.json();
+                mappingCacheStore = nodes;
+                
+                const selectElement = document.getElementById('locationSelect');
+                nodes.forEach(node => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = node.id;
+                    optionElement.textContent = node.name;
+                    selectElement.appendChild(optionElement);
+                });
+            } catch (err) {
+                console.error("Critical maps synchronization error:", err);
+            }
+        }
+
+        async function fetchSlots() {
+            const locId = document.getElementById('locationSelect').value;
+            const mapWrapper = document.getElementById('mapWrapper');
+            const mapPlaceBadge = document.getElementById('mapPlaceBadge');
+            const gatewayView = document.getElementById('paymentSection');
+            const slotLayoutGrid = document.getElementById('slotGrid');
+            const googleMapsBtn = document.getElementById('googleMapsBtn');
+
+            if (!locId) {
+                mapWrapper.classList.add('hidden');
+                gatewayView.classList.add('pointer-events-none', 'opacity-40');
+                slotLayoutGrid.innerHTML = `<p class="text-slate-500 text-xs font-mono col-span-full text-center">Link to a regional zone on the sidebar to communicate with localized hardware mesh arrays.</p>`;
+                return;
+            }
+
+            // Real-Time Map initialization and tracking logic
+            const matchedNodeData = mappingCacheStore.find(item => item.id == locId);
+            if (matchedNodeData) {
+                mapWrapper.classList.remove('hidden');
+                mapPlaceBadge.innerText = matchedNodeData.name.toUpperCase();
+                document.getElementById('latVal').innerText = matchedNodeData.latitude.toFixed(4);
+                document.getElementById('lngVal').innerText = matchedNodeData.longitude.toFixed(4);
+
+                const currentCoords = [matchedNodeData.latitude, matchedNodeData.longitude];
+
+                // IMPROVISED LOGIC: Build the secure external Google Maps tracking link using coordinates
+                // Format used: https://www.google.com/maps/search/?api=1&query=lat,lng
+                googleMapsBtn.href = `https://www.google.com/maps/search/?api=1&query=${matchedNodeData.latitude},${matchedNodeData.longitude}`;
+
+                // Handle Leaflet interactive positioning container rendering
+                if (!mapInstance) {
+                    mapInstance = L.map('leafletMapContainer').setView(currentCoords, 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(mapInstance);
+                    mapMarker = L.marker(currentCoords).addTo(mapInstance);
+                } else {
+                    mapInstance.setView(currentCoords, 15);
+                    mapMarker.setLatLng(currentCoords);
+                }
+                
+                setTimeout(() => { mapInstance.invalidateSize(); }, 200);
+                mapMarker.bindPopup(`<b>Smart Hub:</b><br>${matchedNodeData.name}`).openPopup();
+            }
+
+            try {
+                const res = await fetch(`${BACKEND_ENDPOINT}/slots/${locId}`);
+                const dataSet = await res.json();
+                slotLayoutGrid.innerHTML = '';
+
+                dataSet.forEach(unit => {
+                    const gridCard = document.createElement('button');
+                    gridCard.innerText = `${unit.slot_number}\n[${unit.status}]`;
+                    gridCard.className = `p-5 font-mono text-xs font-bold rounded-xl transition duration-150 border uppercase tracking-wider whitespace-pre-line shadow ${
+                        unit.status === 'Available' 
+                        ? 'bg-emerald-950/40 hover:bg-emerald-900/40 border-emerald-500/40 text-emerald-400' 
+                        : 'bg-rose-950/40 text-rose-400 border-rose-500/30 cursor-not-allowed'
+                    }`;
+
+                    if(unit.status === 'Available') {
+                        gridCard.onclick = () => selectSlotHardwareFlag(unit.id, gridCard);
+                    }
+                    slotLayoutGrid.appendChild(gridCard);
+                });
+            } catch (err) {
+                slotLayoutGrid.innerHTML = `<p class="text-rose-400 col-span-full text-xs font-mono text-center">Hardware sensor grid reading error.</p>`;
+            }
+        }
+
+        function selectSlotHardwareFlag(id, targetDomRef) {
+            targetedSlotInstanceId = id;
+            document.querySelectorAll('#slotGrid button').forEach(button => {
+                if (button.classList.contains('bg-indigo-600')) {
+                    button.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-400');
+                    button.classList.add('bg-emerald-950/40', 'text-emerald-400', 'border-emerald-500/40');
+                }
+            });
+            targetDomRef.classList.remove('bg-emerald-950/40', 'text-emerald-400', 'border-emerald-500/40');
+            targetDomRef.classList.add('bg-indigo-600', 'text-white', 'border-indigo-400');
+            
+            document.getElementById('paymentSection').classList.remove('pointer-events-none', 'opacity-40');
+        }
+
+        async function submitBooking() {
+            const userName = document.getElementById('userName').value.trim();
+            const vehicleNumber = document.getElementById('vehicleNum').value.trim();
+            const cardNumber = document.getElementById('cardNum').value.trim();
+
+            if(!targetedSlotInstanceId || !userName || !vehicleNumber || !cardNumber) {
+                alert("Operation Aborted: Verify entries before processing checkout.");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${BACKEND_ENDPOINT}/book`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slotId: targetedSlotInstanceId, userName, vehicleNumber, cardNumber })
+                });
+                const confirmation = await res.json();
+                
+                alert(confirmation.message);
+                if(confirmation.success) {
+                    document.getElementById('userName').value = '';
+                    document.getElementById('vehicleNum').value = '';
+                    document.getElementById('cardNum').value = '';
+                    targetedSlotInstanceId = null;
+                    document.getElementById('paymentSection').classList.add('pointer-events-none', 'opacity-40');
+                    fetchSlots();
+                    refreshActiveManifestRows();
+                }
+            } catch (err) {
+                alert("Network boundary connection dropped.");
+            }
+        }
+
+        async function refreshActiveManifestRows() {
+            try {
+                const response = await fetch(`${BACKEND_ENDPOINT}/bookings`);
+                const collection = await response.json();
+                const tableBodyRef = document.getElementById('bookingsTableBody');
+                tableBodyRef.innerHTML = '';
+
+                if (collection.length === 0) {
+                    tableBodyRef.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500 font-mono text-xs">No active allocations registered on database schema.</td></tr>`;
+                    return;
+                }
+
+                collection.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-slate-800/40 transition text-slate-300 font-mono text-xs";
+                    row.innerHTML = `
+                        <td class="p-4 font-sans text-slate-200 font-medium">${item.user_name}</td>
+                        <td class="p-4 text-indigo-400">${item.vehicle_number}</td>
+                        <td class="p-4">${item.location_name}</td>
+                        <td class="p-4"><span class="bg-indigo-950 text-indigo-300 border border-indigo-800 px-2 py-0.5 rounded font-bold">${item.slot_number}</span></td>
+                        <td class="p-4 text-slate-400">${item.transaction_id}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="terminateBookingChain(${item.booking_id})" class="bg-rose-600/20 hover:bg-rose-600 border border-rose-500/30 text-rose-400 hover:text-white px-3 py-1 rounded-md transition duration-150 font-sans font-semibold shadow-sm">
+                                Release Sensor Block
+                            </button>
+                        </td>
+                    `;
+                    tableBodyRef.appendChild(row);
+                });
+            } catch (err) {
+                console.error("Failed to parse manifest data rows:", err);
+            }
+        }
+
+        async function terminateBookingChain(id) {
+            if(!confirm("Instruct edge sensors to clear memory allocations for this slot?")) return;
+
+            try {
+                const response = await fetch(`${BACKEND_ENDPOINT}/cancel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId: id })
+                });
+                const serverFeedback = await response.json();
+                
+                alert(serverFeedback.message);
+                fetchSlots();
+                refreshActiveManifestRows();
+            } catch (err) {
+                alert("Cancellation process timeout exception.");
+            }
+        }
+    </script>
+</body>
+</html>
